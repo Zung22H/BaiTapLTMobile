@@ -2,6 +2,7 @@ Câu 1. Mong muốn và định hướng của Bạn là gì sau khi học xong 
 Mong muốn của em qua môn học này là biết được và học được những kĩ năng thực tế mà công ty đòi hỏi ở một lập trình viên thiết bị di động.
 Định hướng của em sẽ tiếp tục học hỏi và tìm hiểu thêm các công nghệ mới sau khi đã học môn học này và sau khi đủ kiến thức cần có em sẽ nộp hồ sơ xin thực tập
 ở một công ty về lập trình app mobile để tích lũy kinh nghiệm .
+
 Câu 2. Theo bạn, trong tương lai gần (10 năm) lập trình di động có phát triển không? Giải thích tại sao?
 Lập trình di động sẽ tiếp tục phát triển mạnh mẽ trong 10 năm tới với những lý do sau:
 Sự Bùng Nổ Của Thiết Bị Di Động
