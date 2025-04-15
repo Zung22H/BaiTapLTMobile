@@ -1,16 +1,42 @@
 package com.example.baitap_tuan06
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
-class taskViewModel : ViewModel() {
+class taskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _tasks = mutableStateListOf<taskModel>()
-    val tasks: List<taskModel> get() = _tasks
+    private val taskDao = TaskDatabase.getDatabase(application).taskDao()
+
+    // StateFlow để quan sát danh sách task
+    private val _tasks = MutableStateFlow<List<taskModel>>(emptyList())
+    val tasks: StateFlow<List<taskModel>> = _tasks
+
+    init {
+        loadTasks()
+    }
+
+    private fun loadTasks() {
+        viewModelScope.launch {
+            _tasks.value = taskDao.getAllTasks()
+        }
+    }
 
     fun addTask(task: taskModel) {
-        _tasks.add(task)
+        viewModelScope.launch {
+            taskDao.insertTask(task)
+            loadTasks()
+        }
     }
+
+    fun deleteTask(task: taskModel) {
+        viewModelScope.launch {
+            taskDao.deleteTask(task)
+            loadTasks()
+        }
+    }
+
 }

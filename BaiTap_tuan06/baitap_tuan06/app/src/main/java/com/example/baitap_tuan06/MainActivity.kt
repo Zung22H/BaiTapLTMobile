@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +18,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,38 +50,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FabPosition
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 
 
 class MainActivity : ComponentActivity() {
-    private val taskViewModel: taskViewModel by viewModels()
+    private val taskViewModel: taskViewModel by viewModels {
+        taskViewModelFactory(application)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-                MainScreen(viewModel = taskViewModel)
+            MainScreen(viewModel = taskViewModel)
         }
     }
 }
+
 
 @Composable
 fun MainScreen(viewModel: taskViewModel) {
@@ -92,7 +94,11 @@ fun MainScreen(viewModel: taskViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(navController: NavController, viewModel: taskViewModel) {
-    val taskList = viewModel.tasks
+
+
+    val taskList by viewModel.tasks.collectAsStateWithLifecycle()
+
+
 
     Scaffold(
         topBar = {
@@ -186,7 +192,8 @@ fun ListScreen(navController: NavController, viewModel: taskViewModel) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(taskList) { task ->
-                        TaskItem(task)
+                        TaskItem(task = task, onDelete = { viewModel.deleteTask(it) })
+
                     }
                 }
             }
@@ -198,7 +205,7 @@ fun ListScreen(navController: NavController, viewModel: taskViewModel) {
 
 
 @Composable
-fun TaskItem(task: taskModel) {
+fun TaskItem(task: taskModel, onDelete: (taskModel) -> Unit) {
     Card (
         modifier = Modifier
             .fillMaxWidth(),
@@ -216,6 +223,13 @@ fun TaskItem(task: taskModel) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+        IconButton(onClick = { onDelete(task) }) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = Color.Red
+            )
         }
     }
 }
@@ -264,7 +278,7 @@ fun AddScreen(navController: NavController, viewModel: taskViewModel) {
             Button (
                 onClick = {
                     if (title.isNotBlank()) {
-                        viewModel.addTask(taskModel(title, description))
+                        viewModel.addTask(taskModel(title = title, description = description))
                         navController.popBackStack()
                     }
                 },
